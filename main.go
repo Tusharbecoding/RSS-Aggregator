@@ -5,7 +5,7 @@ import (
 	"log"
 	"net/http"
 	"os"
-
+  "fmt"
 	"github.com/Tusharbecoding/RSS-Aggregator/internal/database"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/cors"
@@ -17,8 +17,7 @@ type apiConfig struct {
 	DB *database.Queries
 }
 
-func main() {
-
+func main() { 
 	godotenv.Load(".env")
 
 	portString := os.Getenv("PORT")
