@@ -4,9 +4,11 @@ import (
   "time"
   "log"
   "github.com/Tusharbecoding/RSS-Aggregator/internal/database"
+  "sync"
+  "context"
 )
 
-func startScraping (db *database.Queries, concurrecny int, timeBetweenRequest time.Duration) {
+func startScraping (db *database.Queries, concurrency int, timeBetweenRequest time.Duration) {
   log.Println("Starting scraping on %v goroutines in %v duration", concurrency, timeBetweenRequest)
   
   ticker := time.NewTicker(timeBetweenRequest)
@@ -22,9 +24,35 @@ func startScraping (db *database.Queries, concurrecny int, timeBetweenRequest ti
     }
 
     wg := &sync.WaitGroup{}
-    for_, feed := range feeds {
+    for _, feed := range feeds {
       wg.Add(1)
+
+      go scrapeFeed(db, wg, feed)
     }
+    wg.Wait()
   }
+
+}
+
+func scrapeFeed(db *database.Queries, wg *sync.WaitGroup, feed database.Feed) {
+  defer wg.Done()
+
+  _, err := db.MarkFeedAsFetched(context.Background(), feed.ID)
+  if err != nil {
+    log.Println("Error marking feed as fetched: ", err)
+    return
+  }
+
+  rssFeed, err := urlToFeed(feed.Url)
+  if err != nil {
+    log.Println("Error fetching feed: ", err)
+    return
+  }
+
+  for _, item := range rssFeed.Channel.Item {
+    log.Println("Saving item: ", item.Title)
+  }
+
+  log.Printf("Feed %s collected, %v posts found", feed.Name, len(rssFeed.Channel.Item))
 
 }
