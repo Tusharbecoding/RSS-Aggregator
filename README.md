@@ -15,7 +15,7 @@ Credits: [Boot.Dev](https://github.com/bootdotdev)
 ### Cloning the repository
 
 ```shell
-git clone https://github.com/nayak-nirmalya/rssagg.git
+git clone https://github.com/tusharbecoding/rss-aggregator.git
 ```
 
 ### Setup .env file
